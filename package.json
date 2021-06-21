@@ -1,6 +1,6 @@
 {
-  "name": "@tuya-fe/tuya-connector-nodejs",
-  "version": "0.1.0",
+  "name": "@tuya/tuya-connector-nodejs",
+  "version": "1.0.0",
   "description": "tuya openapi nodejs sdk",
   "main": "lib/index.js",
   "license": "MIT",
@@ -22,6 +22,10 @@
     "lint": "eslint --ext ts ./src",
     "prepublishOnly": "yarn lint && yarn test && yarn build",
     "release": "standard-version"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "repository": {
     "type": "git",
