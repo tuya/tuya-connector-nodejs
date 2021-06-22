@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### 1.0.1 (2021-06-01)
 
-
 ### Bug Fixes
 
 * **client:** client request ([9b37d66](https://registry.code.tuya-inc.top/fe-node-base/tuya-connector/commit/9b37d667c1ee32ad9bc3679f3f7dcced5c60ada4))
