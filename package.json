@@ -21,7 +21,10 @@
     "test:cov": "jest --coverage",
     "lint": "eslint --ext ts ./src",
     "prepublishOnly": "yarn lint && yarn test && yarn build",
-    "release": "standard-version"
+    "release:first": "standard-version --first-release",
+    "release:patch": "standard-version -r patch",
+    "release:minor": "standard-version -r minor",
+    "release:major": "standard-version -r major"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
