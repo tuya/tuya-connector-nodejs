@@ -8,6 +8,7 @@ import {
 } from '../interfaces';
 import { MemoryStore } from './tuyaTokenStore';
 import { TuyaContextOptions } from '../interfaces';
+import * as querystring from 'querystring';
 interface TuyaOpenApiClientOptions extends TuyaContextOptions {
   baseUrl: string;
   accessKey: string;
@@ -17,11 +18,12 @@ interface TuyaOpenApiClientOptions extends TuyaContextOptions {
 }
 
 interface TuyaOpenApiClientRequestExtHeader {
-  client_id: string;
   t: string;
+  client_id: string;
   sign_method: 'HMAC-SHA256';
   sign: string;
   access_token: string;
+  'Signature-Headers'?: string;
 }
 
 export interface TuyaOpenApiClientRequestQueryBase {
@@ -71,17 +73,28 @@ class TuyaOpenApiClient {
 
   private readonly rpc: AxiosInstance;
 
+  private readonly version: 'v1' | 'v2';
+
   constructor(opt: TuyaOpenApiClientOptions) {
     this.baseUrl = opt.baseUrl;
     this.accessKey = opt.accessKey;
     this.secretKey = opt.secretKey;
     this.store = opt.store || new MemoryStore();
     this.rpc = opt.rpc || axios;
+    this.version = opt.version || 'v2';
   }
 
   async init(): Promise<TuyaResponse<TuyaResponseGetToken>> {
     const t = Date.now().toString();
-    const headers = await this.getHeader(t, true);
+    let headers = {};
+    switch (this.version) {
+      case 'v1':
+        headers = await this.getHeader(t, true);
+        break;
+      case 'v2':
+        headers = await this.getHeaderV2(t, true, {}, {});
+        break;
+    }
     const { data } = await this.rpc({
       url: `${this.baseUrl}/v1.0/token?grant_type=1`,
       method: 'GET',
@@ -96,7 +109,7 @@ class TuyaOpenApiClient {
   }
 
   async refreshToken(): Promise<TuyaResponse<TuyaResponseRefreshToken>> {
-    const t = `${Date.now()}`;
+    const t = Date.now().toString();
     const refreshToken = await this.store.getRefreshToken();
     const api = `${this.baseUrl}/v1.0/token/${refreshToken}`;
     const headers = await this.getHeader(t, true);
@@ -125,15 +138,26 @@ class TuyaOpenApiClient {
   async request<T>({ 
     path,
     method,
-    query,
-    body,
-    headers,
+    body = {},
+    query = {},
+    headers = {},
     retry = true,
   }: TuyaOpenApiClientRequestOptions)
     : Promise<AxiosResponse<TuyaOpenApiResponse<T>>> {
 
     const t = Date.now().toString();
-    const reqHeaders = await this.getHeader(t, false);
+    let reqHeaders = {};
+    switch(this.version) {
+      case 'v1':
+         reqHeaders = await this.getHeader(t, false);
+        break;
+      case 'v2':
+        reqHeaders = await this.getHeaderV2(t, false, headers, body);
+    }
+    if (this.version === 'v2') {
+      const signHeaders = await this.getSignHeaders(path, method, query, body);
+      reqHeaders = Object.assign(reqHeaders, signHeaders);
+    }
     const param = {
       url: `${this.baseUrl}${path}`,
       method: method,
@@ -149,17 +173,64 @@ class TuyaOpenApiClient {
     return res;
   }
 
+  async getSignHeaders(path: string, method: string, query: TuyaOpenApiClientRequestQueryBase, body: TuyaOpenApiClientRequestBodyBase): Promise<TuyaOpenApiClientRequestExtHeader> {
+    const t = Date.now().toString();
+    // query 字典排序，后续有 form 相关 highway 接口也要加入
+    const sortedQuery: { [k: string]: string } = {};
+    Object.keys(query).sort().forEach(i => sortedQuery[i] = query[i]);
+    const qs = querystring.stringify(sortedQuery);
+    const url = qs ? `${path}?${qs}` : path;
+    let accessToken = await this.store.getAccessToken() || '';
+    if(!accessToken) {
+      await this.init(); // 未获取到 accessToke 时, 重新初始化
+      accessToken = await this.store.getAccessToken() || '';
+    }
+    const contentHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
+    const stringToSign = [method, contentHash, '', url].join('\n');
+    const signStr = this.accessKey + accessToken + t + stringToSign;
+    return {
+      t,
+      'client_id': this.accessKey,
+      sign: this.sign(signStr, this.secretKey),
+      sign_method: "HMAC-SHA256",
+      access_token: accessToken,
+    };
+  }
+
   /**
-   * refreshSign. 计算刷新 token 的签名
+   * 计算刷新 token 的签名
    *
    * @param {string} t 时间戳, 毫秒级
-   * @returns {string} 刷新 token 的签名
+   * @returns {string} token 签名值
    */
   refreshSign(t: string): string {
     const str = `${this.accessKey}${t}`;
     return this.sign(str, this.secretKey);
   }
 
+  async refreshSignV2(t: string, headers: TuyaOpenApiClientRequestHeaderBase): Promise<{ sign: string, signHeaders: string }> {
+    const nonce = '';
+    const method = 'GET';
+    const signUrl = '/v1.0/token?grant_type=1';
+    const contentHash = crypto.createHash('sha256').update('').digest('hex');
+    const signHeaders = Object.keys(headers);
+    const signHeaderStr = Object.keys(signHeaders).reduce((pre, cur, idx) => {
+      return `${pre}${cur}:${headers[cur]}${idx === signHeaders.length - 1 ? '' : '\n'}`;
+    }, '');
+    const stringToSign = [method, contentHash, signHeaderStr, signUrl].join('\n');
+    const signStr = this.accessKey + t + nonce + stringToSign;
+    return {
+      sign: this.sign(signStr, this.secretKey),
+      signHeaders: signHeaders.join(':'),
+    };
+  }
+
+  /**
+   * 获取已有签名(过期则重新获取)
+   *
+   * @param {string} t 时间戳，毫秒级
+   * @returns {string} token 签名值
+   */
   async requestSign(t: string): Promise<string> {
     let accessToken = await this.store.getAccessToken();
     if (!accessToken) {
@@ -170,6 +241,30 @@ class TuyaOpenApiClient {
     return this.sign(str, this.secretKey);
   }
 
+  async requestSignV2(t: string, headers: TuyaOpenApiClientRequestHeaderBase, body: TuyaOpenApiClientRequestBodyBase): Promise<{ sign: string, signHeaders: string }> {
+    let accessToken = await this.store.getAccessToken();
+    if (!accessToken) {
+      await this.init(); // 未获取到 accessToke 时, 重新初始化
+      accessToken = await this.store.getAccessToken();
+    }
+    // 签名信息
+    const nonce = '';
+    const method = 'GET';
+    const signUrl = '/v1.0/token?grant_type=1';
+    const bodyStr = JSON.stringify(body);
+    const contentHash = crypto.createHash('sha256').update(bodyStr).digest('hex');
+    const signHeaders = Object.keys(headers);
+    const signHeaderStr = Object.keys(signHeaders).reduce((pre, cur, idx) => {
+      return `${pre}${cur}:${headers[cur]}${idx === signHeaders.length - 1 ? '' : '\n'}`;
+    }, '');
+    const stringToSign = [method, contentHash, signHeaderStr, signUrl].join('\n');
+    const signStr = this.accessKey + accessToken + t + nonce + stringToSign;
+    return {
+      sign: this.sign(signStr, this.secretKey),
+      signHeaders: signHeaders.join(':'),
+    };
+  }
+
   sign(str: string, secret: string): string {
     return crypto
       .createHmac('sha256', secret)
@@ -178,6 +273,12 @@ class TuyaOpenApiClient {
       .toUpperCase();
   }
 
+  /**
+   * 获取签名后的 headers
+   *
+   * @param {string} t
+   * @param {boolean} forRefresh
+   */
   async getHeader(t: string, forRefresh = false): Promise<TuyaOpenApiClientRequestExtHeader> {
     const sign = forRefresh ? this.refreshSign(t) : await this.requestSign(t);
     const accessToken = await this.store.getAccessToken();
@@ -187,6 +288,19 @@ class TuyaOpenApiClient {
       sign_method: "HMAC-SHA256",
       sign,
       access_token: accessToken || '',
+    };
+  }
+
+  async getHeaderV2(t: string, forRefresh = false, headers: TuyaOpenApiClientRequestHeaderBase, body: TuyaOpenApiClientRequestBodyBase): Promise<TuyaOpenApiClientRequestExtHeader> {
+    const { sign, signHeaders } = forRefresh ? await this.refreshSignV2(t, headers) : await this.requestSignV2(t, headers, body);
+    const accessToken = await this.store.getAccessToken();
+    return {
+      t,
+      'client_id': this.accessKey,
+      sign_method: "HMAC-SHA256",
+      sign,
+      access_token: accessToken || '',
+      'Signature-Headers': signHeaders,
     };
   }
 

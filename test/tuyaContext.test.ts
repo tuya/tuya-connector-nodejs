@@ -15,6 +15,7 @@ const ctxOpt = {
 };
 
 const ctx = new TuyaContext(ctxOpt);
+const ctxV2 = new TuyaContext({ version: 'v2', ...ctxOpt });
 
 beforeAll(async () => {
   axiosMock.onGet(`${ctxOpt.baseUrl}/v1.0/token?grant_type=1`).reply(200, {
@@ -41,7 +42,6 @@ beforeAll(async () => {
 
 test('expect TuyaContext', async () => {
   expect(ctx).toBeDefined();
-
 });
 
 
@@ -54,7 +54,17 @@ test('expect TuyaContext request success', async () => {
   expect(res.success).toBe(true);
   expect(res.result).toBeDefined();
   expect(res.result.access_token).toBeDefined();
+});
 
+test('expect TuyaContext v2 request success', async () => {
+  const res = await ctxV2.request<TuyaResponseRefreshToken>({
+    path: '/v1.0/token/7245ecbc34f0fc8344e2495291342145',
+    method: 'GET',
+  });
+  expect(res).toBeDefined();
+  expect(res.success).toBe(true);
+  expect(res.result).toBeDefined();
+  expect(res.result.access_token).toBeDefined();
 });
 
 

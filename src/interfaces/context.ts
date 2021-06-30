@@ -7,4 +7,5 @@ export interface TuyaContextOptions {
   secretKey: string;
   store?: TuyaTokenStorInterface;
   rpc?: AxiosInstance;
+  version?: 'v1' | 'v2';
 }
