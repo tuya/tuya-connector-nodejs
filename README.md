@@ -11,7 +11,7 @@ Tuya provides a set of HTTP APIs and signature verification logic. You need to i
 ### Installation
 
 ```bash
-npm install @tuya/tuya-connector
+npm install @tuya/tuya-connector-nodejs
 
 # or
 yarn add @tuya/tuya-connector-nodejs
