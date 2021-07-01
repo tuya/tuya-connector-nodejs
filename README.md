@@ -11,16 +11,16 @@ Tuya provides a set of HTTP APIs and signature verification logic. You need to i
 ### Installation
 
 ```bash
-npm install @tuya-fe/tuya-connector
+npm install @tuya/tuya-connector
 
 # or
-yarn add @tuya-fe/tuya-connector-nodejs
+yarn add @tuya/tuya-connector-nodejs
 ```
 
 ### Get started
 
 ```ts
-import { TuyaContext  } from '@tuya-fe/tuya-connector';
+import { TuyaContext  } from '@tuya/tuya-connector-nodejs';
 
 const tuya = new TuyaContext({
   baseUrl: 'https://openapi.tuyacn.com',
@@ -41,7 +41,7 @@ By default, `tokenStore` is implemented based on memory. We recommend that you i
 
 ```ts
 // tokenStore.ts
-import { TuyaTokenStorInterface, TuyaTokensSave } from '@tuya-fe/tuya-connector';
+import { TuyaTokenStorInterface, TuyaTokensSave } from '@tuya/tuya-connector-nodejs';
 import IORedis from 'ioredis';
 
 export class RedisTokenStore implements TuyaTokenStorInterface {
@@ -87,7 +87,7 @@ const tuya = new TuyaContext({
 
 ```ts
 import axios from 'axios';
-import { TuyaContext  } from '@tuya-fe/tuya-connector';
+import { TuyaContext  } from '@tuya/tuya-connector-nodejs';
 
 const tuya = new TuyaContext({
   baseUrl: 'https://openapi.tuyacn.com',
@@ -102,7 +102,7 @@ const tuya = new TuyaContext({
 `tuya-connector` encapsulates common APIs, and declares the types of reqeust and response parameters. You can customize additional API requests.
 
 ```ts
-import { TuyaContext  } from '@tuya-fe/tuya-connector';
+import { TuyaContext  } from '@tuya/tuya-connector-nodejs';
 
 const tuya = new TuyaContext({
   baseUrl: 'https://openapi.tuyacn.com',

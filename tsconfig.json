@@ -9,7 +9,8 @@
     "module": "commonjs",
     "removeComments": false,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2015", "dom"],
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src"

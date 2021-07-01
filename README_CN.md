@@ -11,16 +11,16 @@ tuya-connector 提供了请求签名, token 刷新、存储、续期, 常用接�
 ### 安装
 
 ```bash
-npm install @tuya-fe/tuya-connector
+npm install @tuya/tuya-connector-nodejs
 
 # or
-yarn add @tuya-fe/tuya-connector-nodejs
+yarn add @tuya/tuya-connector-nodejs
 ```
 
 ### 开始
 
 ```ts
-import { TuyaContext  } from '@tuya-fe/tuya-connector';
+import { TuyaContext  } from '@tuya/tuya-connector-nodejs';
 
 const tuya = new TuyaContext({
   baseUrl: 'https://openapi.tuyacn.com',
@@ -42,7 +42,7 @@ const device = await tuya.device.detail({
 
 ```ts
 // tokenStore.ts
-import { TuyaTokenStorInterface, TuyaTokensSave } from '@tuya-fe/tuya-connector';
+import { TuyaTokenStorInterface, TuyaTokensSave } from '@tuya/tuya-connector-nodejs';
 import IORedis from 'ioredis';
 
 export class RedisTokenStore implements TuyaTokenStorInterface {
@@ -88,7 +88,7 @@ tuya-connector 默认使用 axios 作为 httpClient, 同时暴露出可替换的
 
 ```ts
 import axios from 'axios';
-import { TuyaContext  } from '@tuya-fe/tuya-connector';
+import { TuyaContext  } from '@tuya/tuya-connector-nodejs';
 
 const tuya = new TuyaContext({
   baseUrl: 'https://openapi.tuyacn.com',
@@ -103,7 +103,7 @@ const tuya = new TuyaContext({
 tuya-connector 提供了一些常用的接口封装, 声明了对应的入参和出参类型, 对于未覆盖的 Api, 可自定义请求
 
 ```ts
-import { TuyaContext  } from '@tuya-fe/tuya-connector';
+import { TuyaContext  } from '@tuya/tuya-connector-nodejs';
 
 const tuya = new TuyaContext({
   baseUrl: 'https://openapi.tuyacn.com',

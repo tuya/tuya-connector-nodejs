@@ -1,5 +1,6 @@
 import { TuyaContext } from '../src';
 // const { TuyaContext } = require('../lib/index');
+// import { TuyaContext } from '@tuya/tuya-connector-nodejs';
 
 /**
  * api env entrypoint
@@ -12,8 +13,8 @@ import { TuyaContext } from '../src';
 
 const context = new TuyaContext({
   baseUrl: 'https://openapi.tuyacn.com',
-  accessKey: 'xxx',
-  secretKey: 'xxx',
+  accessKey: '',
+  secretKey: '',
 });
 
 const main = async () => {
