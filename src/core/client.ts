@@ -186,7 +186,7 @@ class TuyaOpenApiClient {
       accessToken = await this.store.getAccessToken() || '';
     }
     const contentHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
-    const stringToSign = [method, contentHash, '', url].join('\n');
+    const stringToSign = [method, contentHash, '', decodeURIComponent(url)].join('\n');
     const signStr = this.accessKey + accessToken + t + stringToSign;
     return {
       t,
