@@ -181,7 +181,7 @@ class TuyaOpenApiClient {
     const sortedQuery: { [k: string]: string } = {};
     Object.keys(query).sort().forEach(i => sortedQuery[i] = query[i]);
     const qs = querystring.stringify(sortedQuery);
-    const url = qs ? `${path}?${qs}` : path;
+    const url = qs ? `${path.split('?')[0]}?${qs}` : path;
     let accessToken = await this.store.getAccessToken() || '';
     if(!accessToken) {
       await this.init(); // 未获取到 accessToke 时, 重新初始化
@@ -189,6 +189,7 @@ class TuyaOpenApiClient {
     }
     const contentHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
     const stringToSign = [method, contentHash, '', decodeURIComponent(url)].join('\n');
+    console.log(stringToSign)
     const signStr = this.accessKey + accessToken + t + stringToSign;
     return {
       t,
