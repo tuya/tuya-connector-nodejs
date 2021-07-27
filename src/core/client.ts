@@ -175,7 +175,9 @@ class TuyaOpenApiClient {
 
   async getSignHeaders(path: string, method: string, query: TuyaOpenApiClientRequestQueryBase, body: TuyaOpenApiClientRequestBodyBase): Promise<TuyaOpenApiClientRequestExtHeader> {
     const t = Date.now().toString();
-    // query 字典排序，后续有 form 相关 highway 接口也要加入
+    const pathQuery = querystring.parse(path.split('?')[1]);
+    query = Object.assign(query, pathQuery); // pathQuery first && only top level cover
+    // query params sort
     const sortedQuery: { [k: string]: string } = {};
     Object.keys(query).sort().forEach(i => sortedQuery[i] = query[i]);
     const qs = querystring.stringify(sortedQuery);
