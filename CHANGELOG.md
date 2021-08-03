@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/tuya/tuya-connector-nodejs/compare/v2.1.0...v2.1.1) (2021-08-03)
+
+
+### Bug Fixes
+
+* **array:** querystring support array params && use qs replace querystring module ([0442af6](https://github.com/tuya/tuya-connector-nodejs/commit/0442af66616798f85fd1b57743677ede7f787e40))
+
 ## [2.1.0](https://github.com/tuya/tuya-connector-nodejs/compare/v2.0.6...v2.1.0) (2021-08-03)
 
 
