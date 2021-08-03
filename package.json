@@ -1,6 +1,6 @@
 {
   "name": "@tuya/tuya-connector-nodejs",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "description": "tuya openapi nodejs sdk",
   "main": "lib/index.js",
   "license": "MIT",
