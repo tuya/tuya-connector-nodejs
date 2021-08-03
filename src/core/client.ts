@@ -9,7 +9,6 @@ import {
 } from '../interfaces';
 import { MemoryStore } from './tuyaTokenStore';
 import { TuyaContextOptions } from '../interfaces';
-import * as querystring from 'querystring';
 interface TuyaOpenApiClientOptions extends TuyaContextOptions {
   baseUrl: string;
   accessKey: string;
