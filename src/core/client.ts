@@ -189,7 +189,6 @@ class TuyaOpenApiClient {
     }
     const contentHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
     const stringToSign = [method, contentHash, '', decodeURIComponent(url)].join('\n');
-    console.log(stringToSign)
     const signStr = this.accessKey + accessToken + t + stringToSign;
     return {
       t,
