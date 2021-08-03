@@ -1,4 +1,5 @@
-import crypto from 'crypto';
+import * as qs from 'qs';
+import * as crypto from 'crypto';
 import axios, { AxiosInstance, Method, AxiosResponse } from 'axios';
 import {
   TuyaTokenStorInterface,
@@ -23,6 +24,9 @@ interface TuyaOpenApiClientRequestExtHeader {
   sign_method: 'HMAC-SHA256';
   sign: string;
   access_token: string;
+  Dev_channel: string;
+  Dev_lang: string;
+  path?: string; // axios auto encode
   'Signature-Headers'?: string;
 }
 
@@ -146,7 +150,7 @@ class TuyaOpenApiClient {
     : Promise<AxiosResponse<TuyaOpenApiResponse<T>>> {
 
     const t = Date.now().toString();
-    let reqHeaders = {};
+    let reqHeaders: TuyaOpenApiClientRequestExtHeader;
     switch(this.version) {
       case 'v1':
          reqHeaders = await this.getHeader(t, false);
@@ -154,14 +158,16 @@ class TuyaOpenApiClient {
       case 'v2':
         reqHeaders = await this.getHeaderV2(t, false, headers, body);
     }
+    let url = `${this.baseUrl}${path}`;
     if (this.version === 'v2') {
       const signHeaders = await this.getSignHeaders(path, method, query, body);
       reqHeaders = Object.assign(reqHeaders, signHeaders);
+      url = `${this.baseUrl}${reqHeaders.path}`;
     }
     const param = {
-      url: `${this.baseUrl}${path}`,
+      url,
       method: method,
-      params: query,
+      params: {},
       data: body,
       headers: Object.assign(reqHeaders, headers),
     };
@@ -175,28 +181,32 @@ class TuyaOpenApiClient {
 
   async getSignHeaders(path: string, method: string, query: TuyaOpenApiClientRequestQueryBase, body: TuyaOpenApiClientRequestBodyBase): Promise<TuyaOpenApiClientRequestExtHeader> {
     const t = Date.now().toString();
-    const pathQuery = querystring.parse(path.split('?')[1]);
-    query = Object.assign(query, pathQuery); // pathQuery first && only top level cover
-    // query params sort
+    // 参数去重: querystring 参数优先级高于 query
+    const [uri, pathQuery] = path.split('?');
+    const queryMerged = Object.assign(query, qs.parse(pathQuery));
+    // query 字典排序，后续有 form 相关 highway 接口也要加入
     const sortedQuery: { [k: string]: string } = {};
-    Object.keys(query).sort().forEach(i => sortedQuery[i] = query[i]);
-    const qs = querystring.stringify(sortedQuery);
-    const url = qs ? `${path.split('?')[0]}?${qs}` : path;
+    Object.keys(queryMerged).sort().forEach(i => sortedQuery[i] = query[i]);
+    const querystring = decodeURIComponent(qs.stringify(sortedQuery));
+    const url = querystring ? `${uri}?${querystring}` : uri;
     let accessToken = await this.store.getAccessToken() || '';
     if(!accessToken) {
       await this.init(); // 未获取到 accessToke 时, 重新初始化
       accessToken = await this.store.getAccessToken() || '';
     }
     const contentHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
-    const stringToSign = [method, contentHash, '', decodeURIComponent(url)].join('\n');
+    const stringToSign = [method, contentHash, '', url].join('\n');
     const signStr = this.accessKey + accessToken + t + stringToSign;
     return {
       t,
-      'client_id': this.accessKey,
+      path: url,
+      client_id: this.accessKey,
       sign: this.sign(signStr, this.secretKey),
       sign_method: "HMAC-SHA256",
       access_token: accessToken,
-    };
+      Dev_channel: 'SaaSFramework',
+      Dev_lang: 'Nodejs',
+  };
   }
 
   /**
@@ -285,12 +295,14 @@ class TuyaOpenApiClient {
     const sign = forRefresh ? this.refreshSign(t) : await this.requestSign(t);
     const accessToken = await this.store.getAccessToken();
     return {
-      client_id: this.accessKey,
       t,
-      sign_method: "HMAC-SHA256",
       sign,
+      client_id: this.accessKey,
+      sign_method: "HMAC-SHA256",
       access_token: accessToken || '',
-    };
+      Dev_lang: 'Nodejs',
+      Dev_channel: 'SaaSFramework',
+  };
   }
 
   async getHeaderV2(t: string, forRefresh = false, headers: TuyaOpenApiClientRequestHeaderBase, body: TuyaOpenApiClientRequestBodyBase): Promise<TuyaOpenApiClientRequestExtHeader> {
@@ -298,10 +310,12 @@ class TuyaOpenApiClient {
     const accessToken = await this.store.getAccessToken();
     return {
       t,
-      'client_id': this.accessKey,
-      sign_method: "HMAC-SHA256",
       sign,
+      client_id: this.accessKey,
+      sign_method: "HMAC-SHA256",
       access_token: accessToken || '',
+      Dev_lang: 'Nodejs',
+      Dev_channel: 'SaaSFramework',
       'Signature-Headers': signHeaders,
     };
   }

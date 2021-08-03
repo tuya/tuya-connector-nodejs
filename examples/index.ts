@@ -33,7 +33,7 @@ const main = async () => {
     method: 'GET',
     query: {
       page_size,
-      last_row_key
+      last_row_key,
     }
   });
   if(!res.success) {
