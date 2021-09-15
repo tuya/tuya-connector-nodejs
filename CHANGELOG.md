@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.2](https://github.com/tuya/tuya-connector-nodejs/compare/v2.1.1...v2.1.2) (2021-09-15)
+
+
+### Bug Fixes
+
+* **bugfix:** query params support chinese char ([0e039fe](https://github.com/tuya/tuya-connector-nodejs/commit/0e039fef70c8d9dcbe9479557f277ec12d35d0a3))
+
 ### [2.1.1](https://github.com/tuya/tuya-connector-nodejs/compare/v2.1.0...v2.1.1) (2021-08-03)
 
 
