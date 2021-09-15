@@ -12,7 +12,7 @@ import { TuyaContext } from '../src';
  */
 
 const context = new TuyaContext({
-  baseUrl: 'https://openapi.tuyacn.com',
+  baseUrl: '',
   accessKey: '',
   secretKey: '',
 });
@@ -34,7 +34,9 @@ const main = async () => {
     query: {
       page_size,
       last_row_key,
-    }
+      key1: '支持中文',
+      key2: [{name: 'support'}, {age: 'array'}, {name: 'object'}],
+}
   });
   if(!res.success) {
     new Error();

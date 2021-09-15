@@ -5,7 +5,7 @@ import { default as axios } from 'axios';
 
 let accessToken = '';
 const config = {
-  host: 'https://openapi-cn.wgine.com',
+  host: '',
   accessKey: '',
   secretKey: '',
 };
@@ -43,17 +43,19 @@ async function main() {
     page_size: 100,
     last_row_key: '',
     test1: '1',
-    arr2: [{name:'2'}]
+    test2: '支持中文',
+    test3: [{name:'support array'}]
   };
   const reqHeaders: { [k: string]: string } = await getRequestSign(url, method, {}, query);
+  const { path, ...headers } = reqHeaders;
   console.log('请求头: ', reqHeaders)
 
   const { data } = await httpClient.request({
-    url: reqHeaders.path, // highway 建议数组解析为 x1,x2,x3 格式
+    url: path, // highway 建议数组解析为 x1,x2,x3 格式
     method,
     data: {},
     params: {},
-    headers: reqHeaders,
+    headers,
   });
   if (!data || !data.success) {
     throw Error(`请求 highway 业务接口出错: ${data.msg}`);
@@ -101,14 +103,14 @@ async function getRequestSign(path: string, method: string, headers: { [k: strin
   // qs 序列化时会自动 encode
   // querystring 解析数组有问题，qs 会转成 string 处理(规范未定)
   // qs 和 querystring 都会忽略空数组，序列化失败都会返回空字符串
-  const querystring = decodeURIComponent(qs.stringify(sortedQuery));
+  const querystring = qs.stringify(sortedQuery);
   const url = querystring ? `${uri}?${querystring}` : uri;
   console.log('请求地址: ', url);
   if(!accessToken) {
     // 没有 token 本应该重新去请求，这里图方便直接丢全局对象去，不可能没有 token
   }
   const contentHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
-  const stringToSign = [method, contentHash, '', url].join('\n');
+  const stringToSign = [method, contentHash, '', decodeURIComponent(url)].join('\n');
   const signStr = config.accessKey + accessToken + t + stringToSign;
   return {
     t,

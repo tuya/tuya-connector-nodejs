@@ -159,9 +159,9 @@ class TuyaOpenApiClient {
     }
     let url = `${this.baseUrl}${path}`;
     if (this.version === 'v2') {
-      const signHeaders = await this.getSignHeaders(path, method, query, body);
+      const { path: encodePath, ...signHeaders } = await this.getSignHeaders(path, method, query, body);
       reqHeaders = Object.assign(reqHeaders, signHeaders);
-      url = `${this.baseUrl}${reqHeaders.path}`;
+      url = `${this.baseUrl}${encodePath}`;
     }
     const param = {
       url,
@@ -186,7 +186,7 @@ class TuyaOpenApiClient {
     // query 字典排序，后续有 form 相关 highway 接口也要加入
     const sortedQuery: { [k: string]: string } = {};
     Object.keys(queryMerged).sort().forEach(i => sortedQuery[i] = query[i]);
-    const querystring = decodeURIComponent(qs.stringify(sortedQuery));
+    const querystring = qs.stringify(sortedQuery);
     const url = querystring ? `${uri}?${querystring}` : uri;
     let accessToken = await this.store.getAccessToken() || '';
     if(!accessToken) {
@@ -194,7 +194,7 @@ class TuyaOpenApiClient {
       accessToken = await this.store.getAccessToken() || '';
     }
     const contentHash = crypto.createHash('sha256').update(JSON.stringify(body)).digest('hex');
-    const stringToSign = [method, contentHash, '', url].join('\n');
+    const stringToSign = [method, contentHash, '', decodeURIComponent(url)].join('\n');
     const signStr = this.accessKey + accessToken + t + stringToSign;
     return {
       t,
