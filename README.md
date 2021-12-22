@@ -4,7 +4,7 @@
 
 [Tuya Open Platform—API User Guide](https://developer.tuya.com/en/docs/iot/api-reference?id=Ka7qb7vhber64)
 
-Tuya provides a set of HTTP APIs and signature verification logic. You need to implement the logic during when you integrate the APIs.
+Tuya provides a set of HTTP APIs and signature verification logic. You need to implement the logic when you integrate the APIs.
 
 `tuya-connector` provides capabilities to sign a request, refresh, store, and renew a token, and encapsulate common APIs. You can quickly connect to Tuya open platform.
 
