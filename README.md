@@ -2,13 +2,13 @@
 
 ### What is `tuya-connector`?
 
-[Tuya Open Platform—API User Guide](https://developer.tuya.com/en/docs/iot/api-reference?id=Ka7qb7vhber64)
+[Tuya Open Platform—API Reference](https://developer.tuya.com/en/docs/iot/api-reference?id=Ka7qb7vhber64)
 
-Tuya provides a set of HTTP APIs and signature verification logic. You need to implement the logic when you integrate the APIs.
+Tuya provides a set of HTTP APIs and signature verification logic. You need to implement the logic when you make the API requests.
 
-`tuya-connector` provides capabilities to sign a request, refresh, store, and renew a token, and encapsulate common APIs. You can quickly connect to Tuya open platform.
+`tuya-connector` provides capabilities to sign a request, refresh, store, and renew a token, and encapsulate common APIs, helping you quickly connect to Tuya's open platform.
 
-### Installation
+### Install
 
 ```bash
 npm install @tuya/tuya-connector-nodejs
@@ -31,6 +31,7 @@ const tuya = new TuyaContext({
 const device = await tuya.device.detail({
   device_id: 'device_id'
 });
+
 ```
 
 ## Advanced development
@@ -52,7 +53,7 @@ export class RedisTokenStore implements TuyaTokenStorInterface {
     this.key = key;
   }
 
-    async setTokens(tokens: TuyaTokensSave): Promise<boolean> {
+  async setTokens(tokens: TuyaTokensSave): Promise<boolean> {
     const res = await this.client.set(this.key, JSON.stringify(tokens));
     return ! ! res;
   }
@@ -97,9 +98,9 @@ const tuya = new TuyaContext({
 });
 ```
 
-### Request of other OpenAPIs
+### Requests of other OpenAPIs
 
-`tuya-connector` encapsulates common APIs, and declares the types of reqeust and response parameters. You can customize additional API requests.
+`tuya-connector` encapsulates common APIs, and declares the types of request and response parameters. You can customize additional API requests.
 
 ```ts
 import { TuyaContext  } from '@tuya/tuya-connector-nodejs';
@@ -119,6 +120,6 @@ const { data } = await tuya.request({
 
 ### Other issues
 
-1. Apply for authorization key. On the [Cloud Development Platform](https://iot.tuya.com/cloud/), you can create a project to get the access ID and access secret of the cloud application.
+1. Apply for an authorization key. On the [platform](https://iot.tuya.com/cloud/), you can create a project to get the access ID and access secret of the cloud application.
 
-2. Global error codes. For more information, see [Global Error Codes](https://developer.tuya.com/en/docs/iot/error-code?id=K989ruxx88swc).
+2. For more information about global error codes, see [Global Error Codes](https://developer.tuya.com/en/docs/iot/error-code?id=K989ruxx88swc).
