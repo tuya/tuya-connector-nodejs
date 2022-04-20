@@ -36,27 +36,28 @@ interface DeviceFunctionServiceSpecificationParam {
   device_id: string;
 }
 
+type StatusFunctionsType = {
+  code: string;
+  type: string;
+  name: string;
+  values: string;
+  lang_config: {[key: string]: string};
+}
+
 interface DeviceFunctionServiceSpecificationResult {
   category: string;
-  functions: {
-    code: string;
-    type: string;
-    values: string;
-  }[];
-  status: {
-    code: string;
-    type: string;
-    values: string;
-  }[];
+  status: StatusFunctionsType[];
+  functions: StatusFunctionsType[];
 }
+
+type ObjectType = { [key: string]: string | number | boolean; };
 
 interface DeviceFunctionServiceCommandParam {
   device_id: string;
   commands: {
     code: string;
-    value: string | boolean | number;
+    value: string | boolean | number | ObjectType;
   }[];
-
 }
 
 
@@ -85,7 +86,7 @@ class TuyaOpenApiDeviceFunctionService {
 
   async specification(param: DeviceFunctionServiceSpecificationParam): Promise<TuyaResponse<DeviceFunctionServiceSpecificationResult>> {
     const res = await this.client.request<DeviceFunctionServiceSpecificationResult>({
-      path: `/v1.0/iot-03/devices/${param.device_id}/specification`,
+      path: `/v1.2/iot-03/devices/${param.device_id}/specification`,
       method: 'GET',
     });
     return res.data;
@@ -94,7 +95,10 @@ class TuyaOpenApiDeviceFunctionService {
   async command(param: DeviceFunctionServiceCommandParam): Promise<TuyaResponse<boolean>> {
     const res = await this.client.request<boolean>({
       path: `/v1.0/iot-03/devices/${param.device_id}/commands`,
-      method: 'GET',
+      method: 'POST',
+      body : {
+        commands: param.commands
+      }
     });
     return res.data;
   }
@@ -102,6 +106,13 @@ class TuyaOpenApiDeviceFunctionService {
 }
 
 export {
-  TuyaOpenApiDeviceFunctionService
-}
+  TuyaOpenApiDeviceFunctionService,
+  DeviceFunctionServiceCategoriesParam,
+  DeviceFunctionServiceCategoriesResult,
+  DeviceFunctionServiceDeviceParam,
+  DeviceFunctionServiceDeviceResult,
+  DeviceFunctionServiceSpecificationParam,
+  DeviceFunctionServiceSpecificationResult,
+  DeviceFunctionServiceCommandParam,
+};
 export default TuyaOpenApiDeviceFunctionService;

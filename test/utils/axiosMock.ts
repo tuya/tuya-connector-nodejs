@@ -255,7 +255,30 @@ axiosMock.onPost(/\/v1.0\/iot-02\/assets/).reply(200, {
   });
 
 
-  axiosMock.onGet(/\/v1.0\/iot-03\/devices\/mock-id/).reply(200, {
+  axiosMock.onGet(/\/v1.1\/iot-03\/devices\/mock-id/).reply(200, {
+    "success": true,
+    "result": {
+      "active_time": 1589505938,
+      "category": "qt",
+      "create_time": 1560827137,
+      "icon": "smart/icon/15402589135gknz23xajb_0.png",
+      "id": "60613135b121cddc294****",
+      "ip": "120.198.****.****",
+      "local_key": "3a9b50126fe473****",
+      "name": "体脂秤",
+      "online": true,
+      "asset_id": "1070****",
+      "product_id": "g0er6hSKgMqr****",
+      "product_name": "Wifi scales_OEM",
+      "sub": false,
+      "time_zone": "+08:00",
+      "uid": "ay157896239864843g****",
+      "update_time": 1589764585,
+      "uuid": "60613135b23cddc294****"
+    }
+  });
+
+  axiosMock.onGet(/\/v1.2\/iot-03\/devices\?device_ids=mock-id/).reply(200, {
     "success": true,
     "result": {
       "active_time": 1589505938,
@@ -424,7 +447,7 @@ axiosMock.onPost(/\/v1.0\/iot-02\/assets/).reply(200, {
         ]
     }
   });
-  axiosMock.onGet(/\/v1.0\/iot-03\/devices\/mock-id\/specification/).reply(200, {
+  axiosMock.onGet(/\/v1.2\/iot-03\/devices\/mock-id\/specification/).reply(200, {
        "success":true,
     "t":1571201730542,
     "result":{
@@ -476,7 +499,7 @@ axiosMock.onPost(/\/v1.0\/iot-02\/assets/).reply(200, {
     }
   });
 
-  axiosMock.onPut(/\/v1.0\/iot-03\/devices\/mock-id\/commands/).reply(200, {
+  axiosMock.onPost(/\/v1.0\/iot-03\/devices\/mock-id\/commands/).reply(200, {
     "success":true,
     "t":1551851043862,
     "result":true
@@ -568,4 +591,5 @@ axiosMock.onPost(/\/v1.0\/iot-02\/assets/).reply(200, {
 export {
   axios,
   axiosMock,
-}
+};
+

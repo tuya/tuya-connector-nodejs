@@ -7,45 +7,46 @@ interface DeviceServiceDetailParam {
 
 interface DeviceServiceDetailResult {
   id: string;
-  name: string;
-  uid: string;
-  local_key: string;
+  gateway_id: string;
+  node_id: string;
+  uuid: string;
   category: string;
+  category_name: string;
+  name: string;
   product_id: string;
   product_name: string;
+  local_key: string;
   sub: boolean;
-  uuid: string;
   asset_id: string;
-  online: boolean;
-  active_time: number;
-  icon: string;
+  owner_id: string;
   ip: string;
+  lon: string;
+  lat: string;
+  model: string;
+  time_zone: string;
+  active_time: number;
+  update_time: number;
+  create_time: number;
+  online: boolean;
+  icon: string;
 }
 
 interface DeviceServiceListParam {
+  source_type?: string;
+  source_id?: string;
   device_ids?: string[];
+  name?: string;
+  category?: string;
+  product_id?: string;
+  last_row_key?: string;
+  page_size?: number;
 }
 
 interface DeviceServiceListResult {
-  total: number;
   has_more: boolean;
-  devices: {
-    id: string;
-    uid: string;
-    local_key: string;
-    category: string;
-    product_id: string;
-    sub: boolean;
-    uuid: string;
-    asset_id: string;
-    online: boolean;
-    name: string;
-    ip: string;
-    time_zone: string;
-    create_time: number;
-    update_time: number;
-    active_time: number;
-  }[];
+  list: DeviceServiceDetailResult[];
+  last_row_key: string;
+  total: number;
 }
 
 interface DeviceServiceResetParam {
@@ -95,9 +96,20 @@ interface DeviceServiceChangeFreezeStateParam {
 
 interface DeviceServiceAssetDevicesParam {
   asset_id: string;
+  last_row_key?: string;
+  page_size?: number;
 }
+
 interface DeviceServiceAssetDevicesResult {
-  id: string;
+  list: {
+    device_id: string;
+    asset_id: string;
+    asset_name: string;
+  }[];
+  last_row_key: string;
+  total_size: number;
+  page_size: number;
+  has_next: boolean;
 }
 
 class TuyaOpenApiDeviceService {
@@ -109,7 +121,7 @@ class TuyaOpenApiDeviceService {
 
   async detail(param: DeviceServiceDetailParam): Promise<TuyaResponse<DeviceServiceDetailResult>> {
     const res = await this.client.request<DeviceServiceDetailResult>({
-      path: `/v1.0/iot-03/devices/${param.device_id}`,
+      path: `/v1.1/iot-03/devices/${param.device_id}`,
       method: 'GET',
     });
     return res.data;
@@ -117,9 +129,12 @@ class TuyaOpenApiDeviceService {
 
   async list(param?: DeviceServiceListParam): Promise<TuyaResponse<DeviceServiceListResult>> {
     const res = await this.client.request<DeviceServiceListResult>({
-      path: `/v1.0/iot-03/devices`,
+      path: `/v1.2/iot-03/devices`,
       method: 'GET',
-      query: param,
+      query: {
+        ...param,
+        device_ids: param?.device_ids?.join(',')
+      },
     });
     return res.data;
   }
@@ -194,16 +209,34 @@ class TuyaOpenApiDeviceService {
   }
 
   async assetDevices(param: DeviceServiceAssetDevicesParam): Promise<TuyaResponse<DeviceServiceAssetDevicesResult[]>> {
-
     const res = await this.client.request<DeviceServiceAssetDevicesResult[]>({
-      path: `/v1.0/iot-03/assets/${param.asset_id}/devices`,
+      path: `/v1.0/iot-02/assets/${param.asset_id}/devices`,
       method: 'GET',
+      query: {
+        last_row_key: param.last_row_key,
+        page_size: param.page_size
+      }
     });
     return res.data;
   }
 }
 
 export {
-  TuyaOpenApiDeviceService
-}
+  TuyaOpenApiDeviceService,
+  DeviceServiceDetailParam,
+  DeviceServiceDetailResult,
+  DeviceServiceListParam,
+  DeviceServiceListResult,
+  DeviceServiceResetParam,
+  DeviceServiceDeleteParam,
+  DeviceServiceDeleteBatchParam,
+  DeviceServiceSubDeviceParam,
+  DeviceServiceSubDeviceResult,
+  DeviceServiceChangeNameParam,
+  DeviceServiceFreezeStateParam,
+  DeviceServiceFreezeStateResult,
+  DeviceServiceChangeFreezeStateParam,
+  DeviceServiceAssetDevicesParam,
+  DeviceServiceAssetDevicesResult,
+};
 export default TuyaOpenApiDeviceService;
