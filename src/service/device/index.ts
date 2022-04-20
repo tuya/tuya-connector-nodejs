@@ -1,5 +1,6 @@
-export * from './device';
-export * from './functions';
+export { TuyaOpenApiDeviceService } from './device';
+export { TuyaOpenApiDeviceFunctionService } from './functions';
 export * from './logs';
 export * from './registration';
-export * from './status';
+export { TuyaOpenApiDeviceStatusService } from './status';
+
