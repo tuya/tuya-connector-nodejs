@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/tuya/tuya-connector-nodejs/compare/v2.1.2...v2.2.0) (2022-04-20)
+
+
+### Features
+
+* **enum:** add TuyaDataCenter enum ([954ddf8](https://github.com/tuya/tuya-connector-nodejs/commit/954ddf805bd6c7f42c3429f5a97253b6874dcdae))
+
+
+### Bug Fixes
+
+* **bugfix:** fixed new API version in request URLs ([d8dde15](https://github.com/tuya/tuya-connector-nodejs/commit/d8dde15af60a42fe7b518644caacdc7ce6bc526a))
+
 ### [2.1.2](https://github.com/tuya/tuya-connector-nodejs/compare/v2.1.1...v2.1.2) (2021-09-15)
 
 
